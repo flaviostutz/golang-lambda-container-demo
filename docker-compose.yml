@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+
+  golang-lambda-container-demo:
+    build: .
+    environment:
+      - LOG_LEVEL=debug
+      - READONLY=false
+      - ENDPOINT=http
+    ports:
+      - 3000:3000
+

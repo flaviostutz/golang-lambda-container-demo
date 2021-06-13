@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Golang container Lambda demo
+Resources:
+
+  DemoRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: "golang-lambda-container-demo"
+      ImageScanningConfiguration: 
+        ScanOnPush: true    
+

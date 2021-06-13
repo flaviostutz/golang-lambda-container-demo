@@ -1,0 +1,95 @@
+<html>
+    <head>
+        <script src="http://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+        <script>
+
+            function dataURItoBlob(dataURI) {
+                // convert base64/URLEncoded data component to raw binary data held in a string
+                var byteString;
+                if (dataURI.split(',')[0].indexOf('base64') >= 0) {
+                    byteString = atob(dataURI.split(',')[1]);
+                } else {
+                    byteString = unescape(dataURI.split(',')[1]);
+                }
+                // separate out the mime component
+                var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                // write the bytes of the string to a typed array
+                var ia = new Uint8Array(byteString.length);
+                for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                return new Blob([ia], {type:mimeString});
+            }
+
+            async function destroy() {
+                // alert("destroy!")
+                try {
+                    const rawResponse = await fetch('http://localhost:3000/testes/abc/estudante/123/log?name=destroy', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({'action': 'destroy button pressed!'})
+                    });
+                    const content = await rawResponse.json();
+                    console.log(content);
+                    alert("Destroy success!")
+                } catch(e) {
+                    alert(e)
+                }
+            }
+
+            async function save() {
+                // alert("save!")
+                try {
+                    console.log("log click")
+                    const rawResponse = await fetch('http://localhost:3000/testes/abc/estudante/123/log?name=save', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({'action': 'save button pressed!'})
+                    });
+                    const content = await rawResponse.json();
+                    console.log(content);
+
+                    console.log("log screenshot of current screen")
+
+                    html2canvas(document.querySelector("#capture")).then(async canvas => {
+                        var img = canvas.toDataURL("image/jpeg"); 
+                        var data = dataURItoBlob(img);
+
+                        const rawResponse = await fetch('http://localhost:3000/testes/abc/estudante/123/screenshot?name=save', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'image/jpeg'
+                            },
+                            body: data
+                        });
+                        const content = await rawResponse.json();
+                        console.log(content);
+                        // document.body.appendChild(canvas)
+                        alert("Save success!")
+                    }).catch(e => {
+                        alert(e)
+                    });
+                } catch(e) {
+                    alert(e)
+                }
+            }
+        </script>
+    </head>
+    <body id="capture">
+        <h2>Let's see</h2>
+        <label for="fname">First name:</label>
+        <input type="text" id="fname" name="fname"><br><br>
+        <label for="lname">Last name:</label>
+        <input type="text" id="lname" name="lname"><br><br>
+        <button type="button" onclick="destroy()">Destroy!</button>
+        <button type="button" onclick="save()">Save!</button>
+    </body>
+</html>
+
