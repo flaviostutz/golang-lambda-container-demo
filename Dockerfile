@@ -14,12 +14,15 @@ ADD /go.sum /app/
 
 RUN go mod download
 
-ADD /startup.sh /
-ADD / /app/
+ADD /main.go /app/
+ADD /handlers /app/handlers
 
 # RUN go test -v -p 1
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/golang-lambda-container-demo
 
-RUN GOOS=linux GOARCH=amd64 go build -o /bin/golang-lambda-container-demo
 
+FROM alpine:3.13
+ADD /startup.sh /
+COPY --from=BUILD /bin/golang-lambda-container-demo /bin/
 CMD [ "/startup.sh" ]
 

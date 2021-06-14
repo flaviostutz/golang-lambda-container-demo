@@ -8,6 +8,8 @@ During development, run this container with `docker-compose up`. It will start a
 
 For Lambda deployments, the same container image can be deployed as a AWS Lambda function without modifications.
 
+Check complete script with Cloudformation templates for provisioning all AWS resources below.
+
 ## Usage
 
 ### For local or plain HTTP deployments
@@ -21,23 +23,16 @@ curl localhost:3000/repo
 
 ### For Lambda Function deployments
 
-#### Build and push this image to a AWS ECR repository
+* Configure aws cli environment on your machine with `aws configure`
 
-* Create ECR repository
+* run `build-deploy-aws-lambda-demo.sh`
 
-`aws cloudformation create-stack `
+* It will:
 
-* Create a Cloudformation template file
-
-```yml
-
-```
-
-* Deploy the function
-
-* Create AWS API Gateway with Proxy to the function
-
-* Call the API endpoint
+  * Build and push this image to a AWS ECR repository
+  * Deploy the Lambda function to AWS refering to the container image
+  * Create AWS API Gateway with Proxy to the function
+  * Call the API endpoint for testing a request
 
 ## Details on how to deploy API with Lambda Proxy Integration
 

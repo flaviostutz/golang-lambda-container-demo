@@ -20,7 +20,7 @@ func init() {
 	//flags parse
 	logLevel := "info"
 	readonly := false
-	flag.StringVar(&logLevel, "loglevel", "", "Log level")
+	flag.StringVar(&logLevel, "loglevel", "info", "Log level")
 	flag.BoolVar(&readonly, "readonly", false, "Repo is readonly")
 	flag.Parse()
 

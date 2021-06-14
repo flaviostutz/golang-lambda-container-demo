@@ -15,13 +15,16 @@ repoDomain=$(echo $repoUri | cut -d/ -f1)
 aws ecr --no-verify-ssl get-login-password | docker login --username AWS --password-stdin $repoDomain
 
 echo "Pushing container image to repo..."
-docker push $repoUri
+version=$(docker inspect --format='{{index .Id}}' $repoUri | cut -d\: -f2)
+repoUriTag=$repoUri\:$version
+docker tag $repoUri $repoUriTag
+docker push $repoUriTag
 
 echo "Deploying AWS API Gateway and Lambda Functions with Cloudformation..."
 aws cloudformation deploy \
     --template-file cf-api-lambda.yml \
     --stack-name golang-lambda-demo-service \
-    --parameter-overrides LambdaContainerImageUri=$repoUri \
+    --parameter-overrides LambdaContainerImageUri=$repoUriTag \
     --capabilities CAPABILITY_NAMED_IAM
 
 out=$(aws cloudformation describe-stacks --stack-name golang-lambda-demo-service --query Stacks[].[Outputs[].OutputValue] --output text)

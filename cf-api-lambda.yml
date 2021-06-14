@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Golang container demo Lambda Function
+
+Parameters:
+  LambdaContainerImageUri:
+    Type: String
+    Description: Container image uri containing the Lambda function
+    MinLength: 5
+
+  CorsAllowOrigins:
+    Type: String
+    Description: Cors allowed origins to the API
+    Default: '*'
+
+Conditions:
+  IsAllowOriginsSet: 
+    !Not [!Equals [!Ref CorsAllowOrigins, '*'] ]
+
+Resources:
+
+  HttpAPIGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: golang-lambda-container-proxy-api
+      Description: Proxy API Gateway for Golang Lambda Container Demo
+      ProtocolType: HTTP
+      Target: !GetAtt GolangImageLambdaFunction.Arn
+      CorsConfiguration:
+        AllowCredentials: !If [IsAllowOriginsSet, true, false]
+        AllowHeaders: 
+          - !Ref CorsAllowOrigins
+        AllowMethods: 
+          - '*'
+        AllowOrigins: 
+          - '*'
+        ExposeHeaders: 
+          - '*'
+
+  GolangImageLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      PackageType: Image
+      FunctionName: golang-lambda-container-demo
+      Code:
+        ImageUri: !Ref LambdaContainerImageUri
+      Environment:
+        Variables:
+          LOG_LEVEL: info
+          READONLY: false
+      MemorySize: 128
+      TracingConfig:
+        Mode: Active
+      Timeout: 3
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  APILambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt GolangImageLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+
+Outputs:
+
+  APIEndpoint:
+    Value: !GetAtt HttpAPIGateway.ApiEndpoint
+
+  GolangFunctionArn:
+    Value: !GetAtt GolangImageLambdaFunction.Arn
+
