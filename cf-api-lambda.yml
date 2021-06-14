@@ -36,6 +36,13 @@ Resources:
         ExposeHeaders: 
           - '*'
 
+  HttpAPIGatewayOverrides:
+    Type: AWS::ApiGatewayV2::ApiGatewayManagedOverrides
+    Properties: 
+      ApiId: !Ref HttpAPIGateway
+      Integration: 
+        PayloadFormatVersion: 1.0
+
   GolangImageLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -82,6 +89,10 @@ Resources:
             Action:
             - logs:*
             Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - xray:*
+            Resource: '*'
 
 Outputs:
 
