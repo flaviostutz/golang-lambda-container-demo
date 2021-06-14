@@ -27,9 +27,12 @@ aws cloudformation deploy \
     --parameter-overrides LambdaContainerImageUri=$repoUriTag \
     --capabilities CAPABILITY_NAMED_IAM
 
+sleep 3
 out=$(aws cloudformation describe-stacks --stack-name golang-lambda-demo-service --query Stacks[].[Outputs[].OutputValue] --output text)
 apiUri=$(echo $out | cut -f1)
 
 echo "Golang API is running at $apiUri"
+set +x
 curl $apiUri/repo
+
 

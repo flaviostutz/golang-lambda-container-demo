@@ -42,6 +42,9 @@ Resources:
       ApiId: !Ref HttpAPIGateway
       Integration: 
         PayloadFormatVersion: 1.0
+      Stage:
+        DefaultRouteSettings:
+          DetailedMetricsEnabled: true
 
   GolangImageLambdaFunction:
     Type: AWS::Lambda::Function
