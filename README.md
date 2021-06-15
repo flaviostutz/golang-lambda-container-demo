@@ -73,6 +73,37 @@ curl $apiUri/repo
   * Create AWS API Gateway with Proxy to the function
   * Call the API endpoint for testing a request
 
+## Steps to add support to a Golang application to work as Lambda Proxy
+
+* Dockerfile
+  * create ENV ENV ENDPOINT 'http'
+  * http will launch regular Gin http server. 'lambda' will launch Lambda Gin bridge
+
+* Add "ENDPOINT" flag to startup.sh and main.go
+
+* run `go get github.com/awslabs/aws-lambda-go-api-proxy/gin` to add bridge as dependency
+
+* Add ginLambda = ginadapter.New(httpServer.Router) to main.go init()
+
+* Add to main.go main()
+
+```golang
+	if h.Opt.Endpoint == "http" {
+    //starting regular gin server (without Lambda proxy)
+		err := h.Start()
+    ...
+    return
+  }
+
+  //start Lambda Proxy to Gin bridge
+	lambda.Start(func(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+		return ginLambda.ProxyWithContext(ctx, req)
+	})
+
+```
+
+
+
 ## Details on how to deploy API with Lambda Proxy Integration
 
 https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
